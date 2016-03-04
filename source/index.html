@@ -23,6 +23,8 @@
         </div>
         <script>
         
+
+		
 		var triangles = [];
         var vertexBuffer = null;
 		var indexBuffer  = null;
@@ -32,24 +34,39 @@
 		var pMatrix = null;
 		var vMatrix = null; 
 		var mMatrix = null;
+		var eye     = null;
 		var mMouseX = 0;
 		var mMouseY = 0;
 		
 		var indexCount = 0;
-		
+
         var openGL = null;
         function onInitGL(gl, currentProgram, parameters){
-
+			
+			$('canvas').bind('mousewheel', function(e){
+			
+				var direction = e.originalEvent.deltaY / Math.abs(e.originalEvent.deltaY);
+				eye[2] += direction * 10;
+				
+			});
+			
 			$('canvas').mousemove(function(e){
 				mMouseX = e.offsetX;
 				mMouseY = e.offsetY;
 				var objPos = {};
 				var view = [0, 0, $('canvas').width(), $('canvas').height()];
-				GLU.unProject(e.offsetX, e.offsetY, 0, mMatrix, pMatrix, view, objPos);
 				
-				mMouseX = objPos.x;
-				mMouseY = objPos.y;
-				console.log(objPos);
+				GLU.unProject(e.offsetX, e.offsetY, 0, vMatrix, pMatrix, view, objPos);
+				
+				var v = mat4.create();
+				var p = mat4.create();
+				mat4.transpose(v, vMatrix);
+				mat4.transpose(p, pMatrix);
+				GLU.unProject(e.offsetX, e.offsetY, 0, v, p, view, objPos);
+				
+				mMouseX = objPos['0'];
+				mMouseY = objPos['1'];
+				console.log(mMouseX, mMouseY);
 
 			});
 			openGL = gl;
@@ -260,14 +277,13 @@
         function onRenderGL(gl, currentProgram, parameters){
 			
 			if(isFirstFrame) {
-				mat4.translate(mMatrix, mMatrix, vec3.fromValues(0, 0,-140));
-				mat4.rotate(mMatrix, mMatrix, 90, vec3.fromValues(-1, 0, 0));
+				//mat4.translate(mMatrix, mMatrix, vec3.fromValues(0, 0,-140));
+				//mat4.rotate(mMatrix, mMatrix, 90, vec3.fromValues(-1, 0, 0));
 				isFirstFrame = false;
 			}
 			
 			
-			var eye     = vec3.fromValues(0.0, 0.0,  0.0);
-			var center  = vec3.fromValues(0.0, 0.0, -1.0);
+			var center  = vec3.fromValues(0.0, 0.0, -1550.0);
 			var up      = vec3.fromValues(0.0, 1.0,  0.0);
 			mat4.lookAt(vMatrix, eye, center, up);
 
@@ -318,6 +334,7 @@
 			pMatrix = mat4.create();
 			vMatrix = mat4.create(); 
 			mMatrix = mat4.create();
+			eye     = vec3.fromValues(0.0, 0.0, 0.0);
 		</script>
 	</body> 
 </html>

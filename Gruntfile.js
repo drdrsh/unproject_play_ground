@@ -46,7 +46,6 @@ module.exports = function(grunt) {
 					"source/assets/lib/ace/js/mode-glsl.js" : "./ace-builds/src/mode-glsl.js",
 					"source/assets/lib/gl-matrix/js/gl-matrix.min.js" : "./gl-matrix/dist/gl-matrix-min.js",
  
- 
 					"source/assets/lib/jquery/js/jquery.js" : "./jquery/dist/jquery.js"
                 }
             }

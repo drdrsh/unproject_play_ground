@@ -65,28 +65,64 @@
 		if( defaultFragment === null ||  defaultVertex === null){
 			defaultFragment = [
 				"#ifdef GL_ES",
-				"\tprecision highp float;",
+				"	precision highp float;",
 				"#endif",
+				"",
+				"uniform vec2 vecRawMouse;",
+				"",
 				"uniform float time;",
 				"uniform vec2 resolution;",
 				"void main( void ) {",
-				"\tvec2 position = - 1.0 + 2.0 * gl_FragCoord.xy / resolution.xy;",
-				"\tfloat red = abs( sin( position.x * position.y + time / 5.0 ) );",
-				"\tfloat green = abs( sin( position.x * position.y + time / 4.0 ) );",
-				"\tfloat blue = abs( sin( position.x * position.y + time / 3.0 ) );",
-				"\tgl_FragColor = vec4( red, green, blue, 1.0 );",
+				"",
+				"	vec3 position = gl_FragCoord.xyz;",
+				"",
+				"	float red = 1.0;",
+				"	if(position.y > vecRawMouse.y){",
+				"       red = 0.0;",
+				"	}",
+				"	//gl_FragColor = vec4( red, green, blue, 1.0 );",
+				"	",
+				"	gl_FragColor = vec4( red, 1.0, 1.0, 1.0 );",
+				"",
 				"}"
 			].join("\n");
 			
 			defaultVertex = [
 				"attribute vec3 position;",
-				"void main() {",
-				"\tgl_Position = vec4( position, 1.0 );",
-				"}"
+				"uniform mat4 matP;",
+				"uniform mat4 matV;",
+				"uniform mat4 matM;",
+				"uniform vec2 vecRawMouse;",
+				"uniform vec2 resolution;",
+				"",
+				"void main() { ",
+				"	vec4 pos = vec4( position, 1.0 );",
+				"	gl_Position = matP * matV * matM * pos;",
+				"}",
+				"",
+				"bool intersectPlane(",
+				"	in vec3 origin, in vec3 direction, in vec3 normal, in vec3 vertex,",
+				"	out vec3 point, out float org_distance, out float pnt_distance) { ",
+				"",
+				"    // assuming vectors are all normalized",
+				"    float denom = dot(direction, normal); ",
+				"    if (denom < 1e-6) { ",
+				"		return false;",
+				"	}",
+				"	float numerator = dot( (vertex - origin), normal );",
+				"",
+				"	org_distance = numerator / denom;",
+				"	point = origin + (org_distance * direction);",
+				"	pnt_distance = length( point - vertex );",
+					
+				"	return true;",
+				"",
+				"}",
 			].join("\n");
 		}
         $('#fragment_editor').html(defaultFragment);
         $('#vertex_editor').html(defaultVertex);
+        
         
         gFragmentEditor = ace.edit("fragment_editor");
         gFragmentEditor.setTheme("ace/theme/monokai");
