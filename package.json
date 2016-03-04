@@ -1,0 +1,26 @@
+{
+  "name": "unproject-playground",
+  "version": "1.0.0",
+  "authors": [
+    "drdrsh <mostafa.mohmmed@gmail.com>"
+  ],
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-bower-install-simple": "^1.2.1",
+    "grunt-bowercopy": "^1.2.4",
+    "grunt-open": "^0.2.3",
+    "grunt-serve": "^0.1.6"
+  },
+  "scripts": {}
+}
