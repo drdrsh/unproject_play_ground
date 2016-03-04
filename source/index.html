@@ -37,6 +37,8 @@
 		var eye     = null;
 		var mMouseX = 0;
 		var mMouseY = 0;
+		var mScreenX= 0;
+		var mScreenY= 0;
 		
 		var indexCount = 0;
 
@@ -54,20 +56,35 @@
 				mMouseX = e.offsetX;
 				mMouseY = e.offsetY;
 				var objPos = {};
-				var view = [0, 0, $('canvas').width(), $('canvas').height()];
-				
+				var view = [0, 0, mScreenX, mScreenY];
+				console.log(view);
 				GLU.unProject(e.offsetX, e.offsetY, 0, vMatrix, pMatrix, view, objPos);
+				mMouseX = objPos['0'];
+				mMouseY = objPos['1'];
+				console.log(mMouseX, mMouseY);
+				GLU.unProject(e.offsetX, e.offsetY, 1, vMatrix, pMatrix, view, objPos);
+				mMouseX = objPos['0'];
+				mMouseY = mScreenY - objPos['1'];
+				console.log(mMouseX, mMouseY);
 				
+				/*
 				var v = mat4.create();
 				var p = mat4.create();
 				mat4.transpose(v, vMatrix);
 				mat4.transpose(p, pMatrix);
 				GLU.unProject(e.offsetX, e.offsetY, 0, v, p, view, objPos);
-				
 				mMouseX = objPos['0'];
 				mMouseY = objPos['1'];
 				console.log(mMouseX, mMouseY);
-
+				GLU.unProject(e.offsetX, e.offsetY, 1, v, p, view, objPos);
+				mMouseX = objPos['0'];
+				mMouseY = objPos['1'];
+				console.log(mMouseX, mMouseY);
+				*/
+				
+				console.log("----------------------------------------");
+				console.log("----------------------------------------");
+				
 			});
 			openGL = gl;
 			/*
@@ -257,6 +274,8 @@
         }
         
 		function onResize(gl, currentProgram, parameters) {
+			mScreenX = parameters.screenWidth;
+			mScreenY = parameters.screenHeight;
 			mat4.perspective(pMatrix, 90, parameters.screenWidth / parameters.screenHeight, 0.1, 1200.0);
 		}
 		
