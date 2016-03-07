@@ -62,47 +62,45 @@
 		
 		var defaultFragment = window.localStorage.getItem('fragment_shader');
 		var defaultVertex = window.localStorage.getItem('vertex_shader');
+		var defaultFragment = null;
+		var defaultVertex = null;
+		
 		if( defaultFragment === null ||  defaultVertex === null){
 			defaultFragment = [
 				"#ifdef GL_ES",
 				"	precision highp float;",
 				"#endif",
-				"uniform vec2 vecRawMouse;",
-				"uniform float time;",
-				"uniform vec2 resolution;",
 				"",
+				"varying float intersects;",
 				"void main( void ) {",
 				"",
 				"	vec3 position = gl_FragCoord.xyz;",
-				"",
-				"	float fx2 = vecRawMouse.x - position.x;",
-				"	float fy2 = vecRawMouse.y - position.y;",
-				"	fx2 *= fx2;",
-				"	fy2 *= fy2;",
-				"",
-				"	float d = sqrt(fx2 + fy2);",
-				"",
-				"	float sz = 40.0;",
-				"	float red = 1.0;",
-				"	if(d < sz) {",
-				"	    red = 0.0;",
+				"	if(intersects > 0.0) {",
+				"	    gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );",
+				"	} else {",
+				"        gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );",
 				"	}",
-				"	gl_FragColor = vec4( red, 1.0, 1.0, 1.0 );",
 				"}"
 			].join("\n");
 			
 			defaultVertex = [
-				"attribute vec3 position;",
+				"attribute vec3 vecVertex;",
+				"attribute vec3 vecNormal;",
+				"",
 				"uniform mat4 matP;",
 				"uniform mat4 matV;",
 				"uniform mat4 matM;",
-				"uniform vec2 vecRawMouse;",
-				"uniform vec2 resolution;",
 				"",
-				"void main() { ",
-				"	vec4 pos = vec4( position, 1.0 );",
-				"	gl_Position = matP * matV * matM * pos;",
-				"}",
+				"uniform vec3 vecCameraPosition;",
+				"uniform vec3 vecMouseStart;",
+				"uniform vec3 vecMouseEnd;",
+				"",
+				"vec4  vecTransformedNormal;",
+				"vec3  vecTransformedVertex;",
+				"",
+				"varying float intersects;",
+				"",
+				"",
 				"",
 				"bool intersectPlane(",
 				"	in vec3 origin, in vec3 direction, in vec3 normal, in vec3 vertex,",
@@ -118,9 +116,46 @@
 				"	org_distance = numerator / denom;",
 				"	point = origin + (org_distance * direction);",
 				"	pnt_distance = length( point - vertex );",
-					
 				"	return true;",
 				"",
+				"}",
+				"",
+				"void doIntersect() {",
+				"    vec3 org = vec3(0.0, 0.0,  0.0);",
+				"	vec3 dir = vec3(0.0, 0.0, -1.0);",
+				"	vec3 dst = vec3(0.0, 0.0, -1.0);",
+				"	vec3 nor = vec3(0.0, 1.0,  0.0);",
+				"	vec3 pnt = vec3(0.0, 0.0,  0.0);",
+				"	",
+				"	vec3 intersection_point;",
+				"	float dist_to_intersection;",
+				"	float dist_to_origin;",
+				"",
+				"	//Mouse lock",
+				"	org = vecMouseStart;",
+				"	dst = vecMouseEnd;",
+				"	nor = vecTransformedNormal.xyz;",
+				"	pnt = vecTransformedVertex.xyz;",
+				"	dir = normalize(dst - org);",
+				"",
+				"	bool result = intersectPlane(",
+				"		org, dir, nor, pnt,",
+				"		intersection_point, dist_to_origin, dist_to_intersection",
+				"	);",
+				"",
+				"	if(result && dist_to_intersection < 5.0){",
+				"		intersects = 1.0;",
+				"	}",
+				"}",
+				"",
+				"",
+				"void main() { ",
+				"	vec4 pos = vec4(vecVertex, 1.0 );",
+				"	",
+				"	vecTransformedNormal = matV * matM * vec4(vecNormal, 1.0);",
+				"	vecTransformedVertex = vec3(matV * matM * pos);",
+				"	doIntersect();",
+				"	gl_Position = matP * matV * matM * pos;",
 				"}",
 			].join("\n");
 		}
@@ -203,6 +238,7 @@
             gl.deleteProgram(currentProgram);
         }
         currentProgram = newProgram;
+	
 		window.localStorage.setItem('vertex_shader', vertex_shader);
 		window.localStorage.setItem('fragment_shader', fragment_shader);
     }
